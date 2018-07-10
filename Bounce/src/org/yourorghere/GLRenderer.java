@@ -53,7 +53,7 @@ public class GLRenderer implements GLEventListener {
     vector depanBelakang = new vector(0f, 0f, -1f);//deklarasi awal vektor untuk maju & mundur
     vector samping = new vector(1f, 0f, 0f);//deklarasi awal vektor untuk gerakan ke kanan & kiri
     vector vertikal = new vector(0f, 1f, 0f);//deklarasi awal vetor untuk gerakan naik & turun
-    float Cx = 0, Cy = 2.5f, Cz = 0;
+    float Cx = 0, Cy = 2.5f, Cz = 0f;
     float Lx = 0, Ly = 2.5f, Lz = -20f;
     float angle_depanBelakang = 0f;
     float angle_depanBelakang2 = 0f;
@@ -63,13 +63,15 @@ public class GLRenderer implements GLEventListener {
     float angle_vertikal2 = 0f;
     float silinderAngle = 90f;
     float RotasiBola = 90f;
-    float ax = 0f;
-    float ay = 0.5f;
-    float az = -8f;
+    float lompat = 0;
+    float tx = 0f;
+    float ty = 0.5f;
+    float tz = -8f;
     float rx = 1f;
     float ry = 0f;
     float rz = 0f;
     float pintu = 0f;
+    float tAir = -0.5f;
     boolean ori = true, silinder = false, kamera = false;
 
     /*
@@ -134,7 +136,7 @@ gunakan -1 untuk arah berlawanan dengan vektor awal
         gl.glEnable(GL.GL_DEPTH_TEST);
         gl.glClearColor(0f, 0f, 0.0f, 0.0f);
         gl.glShadeModel(GL.GL_SMOOTH);
-//gl.glShadeModel(GL.GL_SMOOTH); // try setting this to GL_FLAT and see what happens.
+        gl.glShadeModel(GL.GL_SMOOTH); // try setting this to GL_FLAT and see what happens.
     }
 
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
@@ -164,20 +166,59 @@ gunakan -1 untuk arah berlawanan dengan vektor awal
         glu.gluLookAt(Cx, Cy, Cz,
                 Lx, Ly, Lz,
                 vertikal.x, vertikal.y, vertikal.z);
+
         gl.glPushMatrix();
         gl.glTranslatef(0f + pintu, 0.5f, -15f);
-        gl.glRotatef(silinderAngle, 1f, 0f, 0f);
+        gl.glRotatef(90f, 1f, 0f, 0f);
         Objek.Pintu(gl);
         gl.glPopMatrix();
 
         gl.glPushMatrix();
         gl.glTranslatef(-4f - pintu, 0.5f, -15f);
-        gl.glRotatef(silinderAngle, 1f, 0f, 0f);
+        gl.glRotatef(90f, 1f, 0f, 0f);
         Objek.Pintu(gl);
         gl.glPopMatrix();
 
         gl.glPushMatrix();
-        gl.glTranslatef(ax, ay, az);
+        gl.glTranslatef(0f, -0.5f, -28f);
+        gl.glRotatef(-90f, 1f, 0f, 0f);
+        Objek.Tiang(gl);
+        gl.glPopMatrix();
+        gl.glPushMatrix();
+        gl.glTranslatef(0f, -0.5f, -28f);
+        gl.glRotatef(-90f, 1f, 0f, 0f);
+        Objek.Tabung(gl);
+        gl.glPopMatrix();
+
+        gl.glPushMatrix();
+        gl.glTranslatef(0f, 6.0f, -27.8f);
+        gl.glRotatef(silinderAngle = silinderAngle + 2f, 0f, 0f, 1f);
+        Objek.Kipas(gl);
+        gl.glPopMatrix();
+
+        gl.glPushMatrix();
+        gl.glTranslatef(0f, 6.0f, -27.7f);
+        Objek.Paku(gl);
+        gl.glPopMatrix();                              
+
+        for (int i = -4; i <= 3; i++) {
+            for (int j = -4; j <= 3; j++) {
+                gl.glPushMatrix();
+                gl.glTranslatef(0 + j, tAir, -38f - i);
+                gl.glRotatef(90f, 1f, 0f, 0f);
+                Objek.Air(gl);
+                gl.glPopMatrix();
+            }
+        }
+
+        if (tAir == -0.5f) {
+            tAir += 0.04f;
+        } else {
+            tAir = -0.5f;
+        }
+
+        gl.glPushMatrix();
+        gl.glTranslatef(tx, ty, tz);
         gl.glRotatef(RotasiBola, rx, ry, rz);
         Objek.Bola(gl);
         gl.glPopMatrix();
@@ -187,6 +228,14 @@ gunakan -1 untuk arah berlawanan dengan vektor awal
         gl.glRotatef(90f, 1f, 0f, 0f);
         Objek.Jalan(gl);
         gl.glPopMatrix();
+
+        if (tz <= -26f && tz >= -27f && tx >= -2.0f && tx <= 2.0f) {
+            tz = -26;
+            Cz = -18;
+        }else if(tz <= -29f && tz >= -30f && tx >= -2.0f && tx <= 2.0f){
+            tz = -30;
+            Cz = -22;
+        }
 
         if (silinder) {
             silinderAngle += 15f;
@@ -204,20 +253,21 @@ gunakan -1 untuk arah berlawanan dengan vektor awal
 //huruf W
         if (keyCode == 87) {
             vectorMovement(depanBelakang, 0.1f, 1f);
-            az -= 0.1f;
+            tz -= 0.1f;
             rx = -1f;
             ry = 0f;
             rz = 0f;
             RotasiBola += 15f;
             if (pintu == 4) {
 
-            } else if (pintu <= 4 && az <= -10) {
+            } else if (pintu <= 4 && tz <= -10) {
                 pintu += 0.1f;
             }
+
         } //huruf S
         else if (keyCode == 83) {
             vectorMovement(depanBelakang, 0.1f, -1f);
-            az += 0.1f;
+            tz += 0.1f;
             rx = 1f;
             ry = 0f;
             rz = 0f;
@@ -225,16 +275,16 @@ gunakan -1 untuk arah berlawanan dengan vektor awal
         } //huruf D
         else if (keyCode == 68) {
             vectorMovement(samping, 0.1f, 1f);
-            ax += 0.1f;
+            tx += 0.1f;
             rx = 0f;
             ry = 0f;
             rz = 1f;
             RotasiBola += 15f;
 
-            if (ax >= 4f) {
-                ax = 0f;
-                ay = 0.5f;
-                az = -8f;
+            if (tx >= 4f) {
+                tx = 0f;
+                ty = 0.5f;
+                tz = -8f;
                 Cx = 0;
                 Cy = 2.5f;
                 Cz = 0;
@@ -246,16 +296,16 @@ gunakan -1 untuk arah berlawanan dengan vektor awal
         } //huruf A
         else if (keyCode == 65) {
             vectorMovement(samping, 0.1f, -1f);
-            ax -= 0.1f;
+            tx -= 0.1f;
             rx = 0f;
             ry = 0f;
             rz = -1f;
             RotasiBola += 15f;
 
-            if (ax <= -4f) {
-                ax = 0f;
-                ay = 0.5f;
-                az = -8f;
+            if (tx <= -4f) {
+                tx = 0f;
+                ty = 0.5f;
+                tz = -8f;
                 Cx = 0;
                 Cy = 2.5f;
                 Cz = 0;
